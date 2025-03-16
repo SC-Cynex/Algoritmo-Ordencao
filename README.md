@@ -43,13 +43,15 @@ O programa carregará os dados da pasta dados/, executará cada algoritmo e exib
 ```
 
 ## 🛠️ Ferramentas Utilizadas
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-FFFFFF?&style=for-the-badge&logo=opentelemetry&logoColor=black) ![Elasticsearch](https://img.shields.io/badge/elasticsearch-%230377CC.svg?style=for-the-badge&logo=elasticsearch&logoColor=white) 
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-FFFFFF?&style=for-the-badge&logo=opentelemetry&logoColor=black)
 
 - **Python:** Linguagem de programação utilizada para implementação.
 
-- **OpenTelemetry:** Para registro de logs e métricas.
+- **OpenTelemetry:** Para coleta de métricas, logs e traces.
 
-- **Elasticsearch + Kibana:** Para análise de logs.
+- **Jaeger:** Para visualização e análise de traces.
+  
+![image](https://github.com/user-attachments/assets/213e7b04-c421-4fcf-ac01-a666bfc44155)
 
 ## 👨‍💻 Desenvolvedores
 
