@@ -1,4 +1,5 @@
 import time
+import os
 from algoritmos.bubbleSort import BubbleSort
 from algoritmos.bubbleSortPlus import BubbleSortPlus
 from algoritmos.insertionSort import InsertionSort
@@ -9,66 +10,65 @@ from algoritmos.timSort import TimSort
 from algoritmos.heapSort import HeapSort
 from utils.generateData import gerar_dados
 from utils.readData import ler_dados
-from utils.logger import registrar_log
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import Resource
+
+# configurando o OpenTelemetry 
+resource = Resource.create({"service.name": "sorting-algorithms"})
+trace.set_tracer_provider(TracerProvider(resource=resource))
+otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True)
+span_processor = BatchSpanProcessor(otlp_exporter)
+trace.get_tracer_provider().add_span_processor(span_processor)
+
+tracer = trace.get_tracer("sorting-algorithms")
 
 def executar_algoritmo(strategy, dados):
-    inicio = time.time()
-    dados_ordenados, comparacoes, trocas = strategy.ordenar(dados.copy())
-    fim = time.time()
-    tempo_execucao = (fim - inicio) * 1000
-    return dados_ordenados, tempo_execucao, comparacoes, trocas
+    with tracer.start_as_current_span(f"{strategy.__class__.__name__}") as span:
+        span.set_attribute("array_size", len(dados))
+        inicio = time.time()
+        dados_ordenados, comparacoes, trocas = strategy.ordenar(dados.copy())
+        fim = time.time()
+        tempo_execucao = (fim - inicio) * 1000
+        
+        # setando os atributos no span para visualizaçao no Jaeger
+        span.set_attribute("comparisons", comparacoes)
+        span.set_attribute("swaps", trocas)
+        span.set_attribute("execution_time_ms", tempo_execucao)
 
-def comparar_algoritmos(algoritmos, nome_arquivo, repeticoes=5):
-    dados = ler_dados(nome_arquivo)
-    resultados = []
-
-    for nome, strategy in algoritmos.items():
-        tempos = []
-        total_comparacoes = 0
-        total_trocas = 0
-
-        for _ in range(repeticoes):
-            _, tempo_execucao, comparacoes, trocas = executar_algoritmo(strategy, dados)
-            tempos.append(tempo_execucao)
-            total_comparacoes += comparacoes
-            total_trocas += trocas
-
-        tempo_medio = sum(tempos) / repeticoes
-        comparacoes_medias = total_comparacoes // repeticoes
-        trocas_medias = total_trocas // repeticoes
-
-        resultados.append((nome, tempo_medio, comparacoes_medias, trocas_medias))
-
-        registrar_log(nome, len(dados), tempo_medio, comparacoes_medias, trocas_medias)
-
-    return resultados
+        return dados_ordenados, tempo_execucao, comparacoes, trocas
 
 def main():
+    nome_arquivo = 'data/dados_1000.txt'
+    os.makedirs('data', exist_ok=True)
 
-    nome_arquivo = 'dados/dados_1000.txt'
-    try:
-        with open(nome_arquivo, 'r'):
-            pass
-    except FileNotFoundError:
+    if not os.path.exists(nome_arquivo):
         print(f"Arquivo {nome_arquivo} não encontrado. Gerando dados...")
         gerar_dados(1000, nome_arquivo)
+
+    dados = ler_dados(nome_arquivo)
 
     algoritmos = {
         "Bubble Sort": BubbleSort(),
         "Bubble Sort Melhorado": BubbleSortPlus(),
         "Insertion Sort": InsertionSort(),
         "Selection Sort": SelectionSort(),
-        "Quick Sort":  QuickSort(),
+        "Quick Sort": QuickSort(),
         "Merge Sort": MergeSort(),
         "Tim Sort": TimSort(),
         "Heap Sort": HeapSort()
     }
 
-    resultados = comparar_algoritmos(algoritmos, nome_arquivo)
-
-    print("\nResultados:")
-    for nome, tempo, comparacoes, trocas in resultados:
-        print(f"{nome}: Tempo = {tempo:.2f} ms, Comparações = {comparacoes}, Trocas = {trocas}")
+    for nome, algoritmo in algoritmos.items():
+        dados_ordenados, tempo_execucao, comparacoes, trocas = executar_algoritmo(algoritmo, dados)
+        print(f"Algoritmo: {nome}")
+        print(f"Tamanho do conjunto de dados: {len(dados)}")
+        print(f"Tempo de execução: {tempo_execucao:.2f} ms")
+        print(f"Comparações: {comparacoes}")
+        print(f"Trocas: {trocas}")
+        print("-" * 40)
 
 if __name__ == "__main__":
     main()
