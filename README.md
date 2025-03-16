@@ -34,7 +34,7 @@ O programa carregará os dados da pasta dados/, executará cada algoritmo e exib
 ```bash
 /projeto-ordenacao
 ├── algoritmos/          # Implementações dos algoritmos de ordenação
-├── dados/               # Conjuntos de dados gerados
+├── data/                # Conjuntos de dados gerados
 ├── logs/                # Logs de execução
 ├── utils/               # Utilitários (gerador de dados, leitor de dados, logger)
 ├── main.py              # Ponto de entrada do programa
