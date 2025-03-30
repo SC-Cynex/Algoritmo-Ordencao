@@ -14,6 +14,19 @@ git clone https://github.com/SC-Cynex/Algoritmo-Ordencao
 cd Algoritmo-Ordencao
 ```
 
+### 🕵️ Jaeger
+
+Para executar o Jaeger em um container Docker, utilize o seguinte comando:
+
+```bash
+docker run -d \
+  --name jaeger \
+  -e COLLECTOR_OTLP_ENABLED=true \
+  -p 16686:16686 \
+  -p 4317:4317 \
+  jaegertracing/all-in-one:latest
+```
+
 ### ▶️ Execução dos Algoritmos
 Para executar os algoritmos de ordenação e comparar seu desempenho, use o seguinte comando:
 
