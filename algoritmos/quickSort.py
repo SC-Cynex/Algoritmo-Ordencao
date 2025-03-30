@@ -6,30 +6,37 @@ class QuickSort(OrdenacaoStrategy):
         with mp.Manager() as manager:
             comparacoes = manager.Value('i', 0)
             trocas = manager.Value('i', 0)
-            shared_arr = manager.list(dados)
             
-            self._quick_sort_parallel(shared_arr, 0, len(shared_arr)-1, comparacoes, trocas)
+            dados_local = list(dados)
             
-            return list(shared_arr), comparacoes.value, trocas.value
+            max_depth = 3
+            
+            self._quick_sort_parallel(dados_local, 0, len(dados_local) - 1, comparacoes, trocas, max_depth)
+            
+            return dados_local, comparacoes.value, trocas.value
 
-    def _quick_sort_parallel(self, dados, baixo, alto, comparacoes, trocas):
+    def _quick_sort_parallel(self, dados, baixo, alto, comparacoes, trocas, max_depth):
         if baixo < alto:
             pi = self._particionar(dados, baixo, alto, comparacoes, trocas)
-            
-            esquerda = mp.Process(
-                target=self._quick_sort_parallel,
-                args=(dados, baixo, pi-1, comparacoes, trocas)
-            )
-            direita = mp.Process(
-                target=self._quick_sort_parallel,
-                args=(dados, pi+1, alto, comparacoes, trocas)
-            )
-            
-            esquerda.start()
-            direita.start()
-            
-            esquerda.join()
-            direita.join()
+
+            if max_depth > 0:
+                esquerda = mp.Process(target=self._quick_sort_parallel, args=(dados, baixo, pi - 1, comparacoes, trocas, max_depth - 1))
+                direita = mp.Process(target=self._quick_sort_parallel, args=(dados, pi + 1, alto, comparacoes, trocas, max_depth - 1))
+                
+                esquerda.start()
+                direita.start()
+                
+                esquerda.join()
+                direita.join()
+            else:
+                self._quick_sort_sequencial(dados, baixo, pi - 1, comparacoes, trocas)
+                self._quick_sort_sequencial(dados, pi + 1, alto, comparacoes, trocas)
+
+    def _quick_sort_sequencial(self, dados, baixo, alto, comparacoes, trocas):
+        if baixo < alto:
+            pi = self._particionar(dados, baixo, alto, comparacoes, trocas)
+            self._quick_sort_sequencial(dados, baixo, pi - 1, comparacoes, trocas)
+            self._quick_sort_sequencial(dados, pi + 1, alto, comparacoes, trocas)
 
     def _particionar(self, dados, baixo, alto, comparacoes, trocas):
         pivo = dados[alto]
@@ -43,6 +50,7 @@ class QuickSort(OrdenacaoStrategy):
         dados[i + 1], dados[alto] = dados[alto], dados[i + 1]
         trocas.value += 1
         return i + 1
+
 
 # from algoritmos.strategy import OrdenacaoStrategy
 
