@@ -6,6 +6,7 @@ Este projeto tem como objetivo implementar, comparar e analisar a performance de
 
 ### 🔧 Pré-requisitos
 - Python 3.8 ou superior.
+- Docker (para o Jaeger).
 - Gerenciador de pacotes `pip`.
 
 ### 📥 Clone do repositório:
@@ -14,7 +15,7 @@ git clone https://github.com/SC-Cynex/Algoritmo-Ordencao
 cd Algoritmo-Ordencao
 ```
 
-### 🕵️ Jaeger
+### 🕵️ Observabilidade (Jaeger)
 
 Para executar o Jaeger em um container Docker, utilize o seguinte comando:
 
@@ -34,6 +35,8 @@ Para executar os algoritmos de ordenação e comparar seu desempenho, use o segu
 python main.py
 ```
 O programa carregará os dados da pasta dados/, executará cada algoritmo e exibirá métricas como tempo de execução, comparações e trocas.
+
+Para análise de traces acesse: http://localhost:16686
 
 ## 📊 Visualizando Logs e Métricas
 
