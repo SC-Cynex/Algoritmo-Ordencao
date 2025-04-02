@@ -10,36 +10,28 @@ from algoritmos.timSort import TimSort
 from algoritmos.heapSort import HeapSort
 from utils.generateData import gerar_dados
 from utils.readData import ler_dados
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.resources import Resource
-
-# configurando o OpenTelemetry 
-resource = Resource.create({"service.name": "sorting-algorithms"})
-trace.set_tracer_provider(TracerProvider(resource=resource))
-otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True)
-span_processor = BatchSpanProcessor(otlp_exporter)
-trace.get_tracer_provider().add_span_processor(span_processor)
-
-tracer = trace.get_tracer("sorting-algorithms")
+from algoritmos.binary import BinarySearchWithCache
 
 def executar_algoritmo(strategy, dados):
-    with tracer.start_as_current_span(f"{strategy.__class__.__name__}") as span:
-        span.set_attribute("array_size", len(dados))
-        inicio = time.time()
-        dados_ordenados, comparacoes, trocas = strategy.ordenar(dados.copy())
-        fim = time.time()
-        tempo_execucao = (fim - inicio) * 1000
-        
-        # setando os atributos no span para visualizaçao no Jaeger
-        span.set_attribute("comparisons", comparacoes)
-        span.set_attribute("swaps", trocas)
-        span.set_attribute("execution_time_ms", tempo_execucao)
+    inicio = time.time()
+    dados_ordenados, comparacoes, trocas = strategy.ordenar(dados.copy())
+    fim = time.time()
+    tempo_execucao = (fim - inicio) * 1000
+    
+    print(f"\nEstatísticas do {strategy.__class__.__name__}:")
+    print(f"  - Tamanho do array: {len(dados)}")
+    print(f"  - Comparações: {comparacoes}")
+    print(f"  - Trocas: {trocas}")
+    print(f"  - Tempo de execução: {tempo_execucao:.2f} ms")
 
-        return dados_ordenados, tempo_execucao, comparacoes, trocas
-
+    return dados_ordenados, tempo_execucao, comparacoes, trocas
+algoritmos = {
+    "Bubble Sort": BubbleSort(),
+    "Insertion Sort": InsertionSort(),
+    "Quick Sort": QuickSort(),
+    "Merge Sort": MergeSort(),
+    "Binary Search": BinarySearchWithCache()
+}
 def main():
     nome_arquivo = 'data/dados_1000.txt'
     os.makedirs('data', exist_ok=True)
@@ -49,26 +41,36 @@ def main():
         gerar_dados(1000, nome_arquivo)
 
     dados = ler_dados(nome_arquivo)
+    dados_ordenados, _, _, _ = executar_algoritmo(MergeSort(), dados)
+    
+    buscador = BinarySearchWithCache()
+    valores_para_buscar = [dados_ordenados[0], dados_ordenados[-1], 
+                          dados_ordenados[len(dados_ordenados)//2], 99999]
+    
+    for valor in valores_para_buscar:
+        inicio = time.time()
+        indice = buscador.binary_search(dados_ordenados, valor)
+        fim = time.time()
+        tempo_execucao = (fim - inicio) * 1000
+        
+        if indice != -1:
+            print(f"Valor {valor} encontrado no índice {indice} (tempo: {tempo_execucao:.4f} ms)")
+        else:
+            print(f"Valor {valor} não encontrado (tempo: {tempo_execucao:.4f} ms)")
 
-    algoritmos = {
-        "Bubble Sort": BubbleSort(),
-        "Bubble Sort Melhorado": BubbleSortPlus(),
-        "Insertion Sort": InsertionSort(),
-        "Selection Sort": SelectionSort(),
-        "Quick Sort": QuickSort(),
-        "Merge Sort": MergeSort(),
-        "Tim Sort": TimSort(),
-        "Heap Sort": HeapSort()
-    }
+    print("\nTestando cache:")
+    valor_teste = dados_ordenados[len(dados_ordenados)//2]
 
-    for nome, algoritmo in algoritmos.items():
-        dados_ordenados, tempo_execucao, comparacoes, trocas = executar_algoritmo(algoritmo, dados)
-        print(f"Algoritmo: {nome}")
-        print(f"Tamanho do conjunto de dados: {len(dados)}")
-        print(f"Tempo de execução: {tempo_execucao:.2f} ms")
-        print(f"Comparações: {comparacoes}")
-        print(f"Trocas: {trocas}")
-        print("-" * 40)
+    inicio = time.time()
+    buscador.binary_search(dados_ordenados, valor_teste)
+    fim = time.time()
+    print(f"Tempo da primeira busca: {(fim - inicio) * 1000:.4f} ms")
 
+    inicio = time.time()
+    buscador.binary_search(dados_ordenados, valor_teste)
+    fim = time.time()
+    print(f"Tempo da segunda busca: {(fim - inicio) * 1000:.4f} ms")
+    
+    buscador.clear_cache()
 if __name__ == "__main__":
     main()
