@@ -1,12 +1,11 @@
 # Análise de Algoritmos de Ordenação
 
-Este projeto tem como objetivo implementar, comparar e analisar a performance de diferentes algoritmos de ordenação. Ele utiliza o padrão **Strategy** para garantir modularidade e extensibilidade, além de ferramentas como **OpenTelemetry** para registro de logs e métricas.
+Este projeto tem como objetivo implementar, comparar e analisar a performance da ordenação binária. Utilizamos o padrão Strategy para garantir modularidade e extensibilidade.
 
 ## 📌 Instalação
 
 ### 🔧 Pré-requisitos
 - Python 3.8 ou superior.
-- Docker (para o Jaeger).
 - Gerenciador de pacotes `pip`.
 
 ### 📥 Clone do repositório:
@@ -15,17 +14,10 @@ git clone https://github.com/SC-Cynex/Algoritmo-Ordencao
 cd Algoritmo-Ordencao
 ```
 
-### 🕵️ Observabilidade (Jaeger)
-
-Para executar o Jaeger em um container Docker, utilize o seguinte comando:
+#### Testar versão binária
 
 ```bash
-docker run -d \
-  --name jaeger \
-  -e COLLECTOR_OTLP_ENABLED=true \
-  -p 16686:16686 \
-  -p 4317:4317 \
-  jaegertracing/all-in-one:latest
+git checkout binary
 ```
 
 ### ▶️ Execução dos Algoritmos
@@ -34,16 +26,7 @@ Para executar os algoritmos de ordenação e comparar seu desempenho, use o segu
 ```bash
 python main.py
 ```
-O programa carregará os dados da pasta dados/, executará cada algoritmo e exibirá métricas como tempo de execução, comparações e trocas.
-
-Para análise de traces acesse: http://localhost:16686
-
-## 📊 Visualizando Logs e Métricas
-
-**Logs:** Os logs de execução são registrados usando OpenTelemetry e podem ser visualizados na ferramenta configurada (ex: Jaeger, Elasticsearch + Kibana).
-
-**Métricas:** As métricas de desempenho são exportadas para Prometheus e podem ser visualizadas no Grafana.
-
+O programa carregará os dados da pasta data/, executará cada algoritmo e exibirá métricas como tempo de execução, comparações e trocas.
 
 ## 📂 Estrutura do Projeto
 
@@ -59,15 +42,9 @@ Para análise de traces acesse: http://localhost:16686
 ```
 
 ## 🛠️ Ferramentas Utilizadas
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-FFFFFF?&style=for-the-badge&logo=opentelemetry&logoColor=black)
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 
 - **Python:** Linguagem de programação utilizada para implementação.
-
-- **OpenTelemetry:** Para coleta de métricas, logs e traces.
-
-- **Jaeger:** Para visualização e análise de traces.
-  
-![image](https://github.com/user-attachments/assets/213e7b04-c421-4fcf-ac01-a666bfc44155)
 
 ## 👨‍💻 Desenvolvedores
 
